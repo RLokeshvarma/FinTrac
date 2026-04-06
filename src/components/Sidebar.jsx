@@ -41,7 +41,7 @@ export default function Sidebar() {
       <aside className={`sidebar ${menuOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-logo">
           <span className="logo-icon">◈</span>
-          <span className="logo-text">Fintrack</span>
+          <span className="logo-text">FinTrac</span>
         </div>
 
         <nav className="sidebar-nav">
