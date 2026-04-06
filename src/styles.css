@@ -683,6 +683,98 @@ input, select, textarea {
   margin-bottom: 12px;
 }
 
+
+/* ========================
+   SHOW/HIDE HELPERS
+======================== */
+.desktop-only { display: block; }
+.mobile-only  { display: none; }
+
+/* ========================
+   MOBILE TRANSACTION CARDS
+======================== */
+.tx-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tx-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+
+.tx-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tx-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.tx-card-desc {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tx-card-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tx-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tx-card-amount {
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tx-card-amount.income { color: var(--green); }
+.tx-card-amount.expense { color: var(--red); }
+
+.tx-card-actions {
+  display: flex;
+  gap: 5px;
+}
 /* ========================
    MODAL
 ======================== */
@@ -942,6 +1034,8 @@ input, select, textarea {
 }
 
 @media (max-width: 768px) {
+  .desktop-only { display: none; }
+  .mobile-only  { display: block; }
   :root {
     --sidebar-w: 0px;
     --topbar-h: 56px;

@@ -16,20 +16,9 @@ export default function TransactionsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editTx, setEditTx] = useState(null);
 
-  function openAdd() {
-    setEditTx(null);
-    setShowModal(true);
-  }
-
-  function openEdit(tx) {
-    setEditTx(tx);
-    setShowModal(true);
-  }
-
-  function closeModal() {
-    setShowModal(false);
-    setEditTx(null);
-  }
+  function openAdd() { setEditTx(null); setShowModal(true); }
+  function openEdit(tx) { setEditTx(tx); setShowModal(true); }
+  function closeModal() { setShowModal(false); setEditTx(null); }
 
   let filtered = txList.filter(t => {
     if (filterType !== "All" && t.type !== filterType.toLowerCase()) return false;
@@ -62,7 +51,6 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* Filters */}
       <div className="filters-bar">
         <input
           className="search-input"
@@ -89,62 +77,90 @@ export default function TransactionsPage() {
         </select>
       </div>
 
-      {/* Table */}
       {filtered.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon">◎</span>
           <p>No transactions match your filters.</p>
         </div>
       ) : (
-        <div className="tx-table-wrap">
-          <table className="tx-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Type</th>
-                <th>Amount</th>
-                {role === "admin" && <th>Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(tx => (
-                <tr key={tx.id}>
-                  <td className="tx-date-cell">{formatDate(tx.date)}</td>
-                  <td className="tx-desc-cell">{tx.desc}</td>
-                  <td>
-                    <span
-                      className="cat-badge"
-                      style={{ background: categoryColors[tx.category] + "22", color: categoryColors[tx.category] }}
-                    >
-                      {tx.category}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`type-badge ${tx.type}`}>
-                      {tx.type === "income" ? "↑ Income" : "↓ Expense"}
-                    </span>
-                  </td>
-                  <td className={`amount-cell ${tx.type}`}>
-                    {tx.type === "income" ? "+" : "-"}₹{tx.amount.toLocaleString("en-IN")}
-                  </td>
-                  {role === "admin" && (
-                    <td className="actions-cell">
-                      <button className="btn-edit" onClick={() => openEdit(tx)}>Edit</button>
-                      <button className="btn-delete" onClick={() => deleteTransaction(tx.id)}>Delete</button>
-                    </td>
-                  )}
+        <>
+          {/* Desktop Table */}
+          <div className="tx-table-wrap desktop-only">
+            <table className="tx-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  {role === "admin" && <th>Actions</th>}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map(tx => (
+                  <tr key={tx.id}>
+                    <td className="tx-date-cell">{formatDate(tx.date)}</td>
+                    <td className="tx-desc-cell">{tx.desc}</td>
+                    <td>
+                      <span className="cat-badge" style={{ background: categoryColors[tx.category] + "22", color: categoryColors[tx.category] }}>
+                        {tx.category}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`type-badge ${tx.type}`}>
+                        {tx.type === "income" ? "↑ Income" : "↓ Expense"}
+                      </span>
+                    </td>
+                    <td className={`amount-cell ${tx.type}`}>
+                      {tx.type === "income" ? "+" : "-"}₹{tx.amount.toLocaleString("en-IN")}
+                    </td>
+                    {role === "admin" && (
+                      <td className="actions-cell">
+                        <button className="btn-edit" onClick={() => openEdit(tx)}>Edit</button>
+                        <button className="btn-delete" onClick={() => deleteTransaction(tx.id)}>Delete</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card List */}
+          <div className="tx-card-list mobile-only">
+            {filtered.map(tx => (
+              <div key={tx.id} className="tx-card">
+                <div className="tx-card-left">
+                  <div className="tx-card-dot" style={{ background: categoryColors[tx.category] || "#94a3b8" }}></div>
+                  <div className="tx-card-info">
+                    <span className="tx-card-desc">{tx.desc}</span>
+                    <div className="tx-card-meta">
+                      <span className="cat-badge" style={{ background: categoryColors[tx.category] + "22", color: categoryColors[tx.category] }}>
+                        {tx.category}
+                      </span>
+                      <span className="tx-card-date">{formatDate(tx.date)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="tx-card-right">
+                  <span className={`tx-card-amount ${tx.type}`}>
+                    {tx.type === "income" ? "+" : "-"}₹{tx.amount.toLocaleString("en-IN")}
+                  </span>
+                  {role === "admin" && (
+                    <div className="tx-card-actions">
+                      <button className="btn-edit" onClick={() => openEdit(tx)}>Edit</button>
+                      <button className="btn-delete" onClick={() => deleteTransaction(tx.id)}>Del</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
-      {showModal && (
-        <TransactionModal existingTx={editTx} onClose={closeModal} />
-      )}
+      {showModal && <TransactionModal existingTx={editTx} onClose={closeModal} />}
     </div>
   );
 }
