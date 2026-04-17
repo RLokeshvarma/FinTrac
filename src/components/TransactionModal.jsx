@@ -9,17 +9,18 @@ export default function TransactionModal({ existingTx, onClose }) {
 
   const [form, setForm] = useState({
     date: "",
-    desc: "",
+    description: "",
     amount: "",
     category: "Food",
     type: "expense",
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (existingTx) {
       setForm({
         date: existingTx.date,
-        desc: existingTx.desc,
+        description: existingTx.description,
         amount: existingTx.amount,
         category: existingTx.category,
         type: existingTx.type,
@@ -31,9 +32,11 @@ export default function TransactionModal({ existingTx, onClose }) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit() {
-    if (!form.date || !form.desc || !form.amount) return alert("Please fill all fields.");
-
+  async function handleSubmit() {
+    if (!form.date || !form.description || !form.amount) {
+      return alert("Please fill all fields.");
+    }
+    setSaving(true);
     const tx = {
       ...form,
       amount: Number(form.amount),
@@ -41,10 +44,11 @@ export default function TransactionModal({ existingTx, onClose }) {
     };
 
     if (existingTx) {
-      editTransaction({ ...tx, id: existingTx.id });
+      await editTransaction({ ...tx, id: existingTx.id });
     } else {
-      addTransaction(tx);
+      await addTransaction(tx);
     }
+    setSaving(false);
     onClose();
   }
 
@@ -57,23 +61,41 @@ export default function TransactionModal({ existingTx, onClose }) {
         </div>
 
         <div className="modal-form">
-          <label>Date
+          <label>
+            Date
             <input type="date" name="date" value={form.date} onChange={handleChange} />
           </label>
-          <label>Description
-            <input type="text" name="desc" value={form.desc} onChange={handleChange} placeholder="e.g. Salary, Swiggy..." />
+          <label>
+            Description
+            <input
+              type="text"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="e.g. Salary, Swiggy..."
+            />
           </label>
-          <label>Amount (₹)
-            <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="0" min="1" />
+          <label>
+            Amount (₹)
+            <input
+              type="number"
+              name="amount"
+              value={form.amount}
+              onChange={handleChange}
+              placeholder="0"
+              min="1"
+            />
           </label>
-          <label>Type
+          <label>
+            Type
             <select name="type" value={form.type} onChange={handleChange}>
               <option value="income">Income</option>
               <option value="expense">Expense</option>
             </select>
           </label>
           {form.type === "expense" && (
-            <label>Category
+            <label>
+              Category
               <select name="category" value={form.category} onChange={handleChange}>
                 {expenseCategories.map(c => (
                   <option key={c} value={c}>{c}</option>
@@ -84,8 +106,8 @@ export default function TransactionModal({ existingTx, onClose }) {
 
           <div className="modal-actions">
             <button className="btn-cancel" onClick={onClose}>Cancel</button>
-            <button className="btn-save" onClick={handleSubmit}>
-              {existingTx ? "Save Changes" : "Add"}
+            <button className="btn-save" onClick={handleSubmit} disabled={saving}>
+              {saving ? "Saving..." : existingTx ? "Save Changes" : "Add"}
             </button>
           </div>
         </div>

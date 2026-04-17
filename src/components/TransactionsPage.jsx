@@ -5,12 +5,12 @@ import TransactionModal from "./TransactionModal";
 
 export default function TransactionsPage() {
   const {
-    txList, deleteTransaction,
+    txList, loading, deleteTransaction,
     filterType, setFilterType,
     filterCategory, setFilterCategory,
     searchText, setSearchText,
     sortBy, setSortBy,
-    role,
+    role, activeSheetName,
   } = useApp();
 
   const [showModal, setShowModal] = useState(false);
@@ -23,7 +23,7 @@ export default function TransactionsPage() {
   let filtered = txList.filter(t => {
     if (filterType !== "All" && t.type !== filterType.toLowerCase()) return false;
     if (filterCategory !== "All" && t.category !== filterCategory) return false;
-    if (searchText && !t.desc.toLowerCase().includes(searchText.toLowerCase())) return false;
+    if (searchText && !t.description?.toLowerCase().includes(searchText.toLowerCase())) return false;
     return true;
   });
 
@@ -36,14 +36,18 @@ export default function TransactionsPage() {
   });
 
   function formatDate(d) {
-    return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    return new Date(d).toLocaleDateString("en-IN", {
+      day: "2-digit", month: "short", year: "numeric",
+    });
   }
 
   return (
     <div className="page-content">
       <div className="page-header">
         <div>
-          <h2 className="page-title">Transactions</h2>
+          <h2 className="page-title">
+            {activeSheetName ? `📁 ${activeSheetName}` : "Transactions"}
+          </h2>
           <p className="page-sub">{filtered.length} transactions found</p>
         </div>
         {role === "admin" && (
@@ -77,10 +81,15 @@ export default function TransactionsPage() {
         </select>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
         <div className="empty-state">
           <span className="empty-icon">◎</span>
-          <p>No transactions match your filters.</p>
+          <p>Loading transactions...</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-icon">◎</span>
+          <p>No transactions found. {role === "admin" ? "Add one to get started." : ""}</p>
         </div>
       ) : (
         <>
@@ -101,9 +110,15 @@ export default function TransactionsPage() {
                 {filtered.map(tx => (
                   <tr key={tx.id}>
                     <td className="tx-date-cell">{formatDate(tx.date)}</td>
-                    <td className="tx-desc-cell">{tx.desc}</td>
+                    <td className="tx-desc-cell">{tx.description}</td>
                     <td>
-                      <span className="cat-badge" style={{ background: categoryColors[tx.category] + "22", color: categoryColors[tx.category] }}>
+                      <span
+                        className="cat-badge"
+                        style={{
+                          background: categoryColors[tx.category] + "22",
+                          color: categoryColors[tx.category],
+                        }}
+                      >
                         {tx.category}
                       </span>
                     </td>
@@ -132,11 +147,20 @@ export default function TransactionsPage() {
             {filtered.map(tx => (
               <div key={tx.id} className="tx-card">
                 <div className="tx-card-left">
-                  <div className="tx-card-dot" style={{ background: categoryColors[tx.category] || "#94a3b8" }}></div>
+                  <div
+                    className="tx-card-dot"
+                    style={{ background: categoryColors[tx.category] || "#94a3b8" }}
+                  ></div>
                   <div className="tx-card-info">
-                    <span className="tx-card-desc">{tx.desc}</span>
+                    <span className="tx-card-desc">{tx.description}</span>
                     <div className="tx-card-meta">
-                      <span className="cat-badge" style={{ background: categoryColors[tx.category] + "22", color: categoryColors[tx.category] }}>
+                      <span
+                        className="cat-badge"
+                        style={{
+                          background: categoryColors[tx.category] + "22",
+                          color: categoryColors[tx.category],
+                        }}
+                      >
                         {tx.category}
                       </span>
                       <span className="tx-card-date">{formatDate(tx.date)}</span>
