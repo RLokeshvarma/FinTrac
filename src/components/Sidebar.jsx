@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import ProfilePanel from "./ProfilePanel";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: "⊞" },
@@ -12,17 +13,19 @@ const navItems = [
 export default function Sidebar() {
   const {
     activePage, setActivePage,
-    activeSheetName, setActiveSheetId, setActiveSheetName,
+    activeSheetName, setActiveSheetId, setActiveSheetName, setActiveSheetRole,
     role,
   } = useApp();
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   function handleNavClick(id) {
     setActivePage(id);
     if (id !== "transactions") {
       setActiveSheetId(null);
       setActiveSheetName(null);
+      setActiveSheetRole(null);
     }
     setMenuOpen(false);
   }
@@ -30,6 +33,7 @@ export default function Sidebar() {
   function clearSheet() {
     setActiveSheetId(null);
     setActiveSheetName(null);
+    setActiveSheetRole(null);
   }
 
   return (
@@ -43,33 +47,18 @@ export default function Sidebar() {
           <span className="logo-icon">◈</span>
           <span className="logo-text">FinTrac</span>
         </div>
-        <span className={`mobile-role-badge ${role}`}>
-          {role === "admin" ? "Admin" : "Viewer"}
-        </span>
+        <button className="mobile-avatar-btn" onClick={() => setProfileOpen(true)}>
+          {profile?.name?.charAt(0).toUpperCase() || "U"}
+        </button>
       </div>
 
-      {menuOpen && (
-        <div className="sidebar-overlay" onClick={() => setMenuOpen(false)} />
-      )}
+      {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)} />}
 
       <aside className={`sidebar ${menuOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-logo">
           <span className="logo-icon">◈</span>
           <span className="logo-text">FinTrac</span>
         </div>
-
-        {/* User info */}
-        {profile && (
-          <div className="sidebar-user">
-            <div className="user-avatar">
-              {profile.name?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="user-info">
-              <p className="user-name">{profile.name}</p>
-              <p className="user-role">{profile.role}</p>
-            </div>
-          </div>
-        )}
 
         <nav className="sidebar-nav">
           {navItems.map(item => (
@@ -84,7 +73,7 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* Active sheet tag */}
+        {/* Active sheet indicator */}
         {activeSheetName && activePage === "transactions" && (
           <div className="active-sheet-tag">
             <span>📁 {activeSheetName}</span>
@@ -92,12 +81,23 @@ export default function Sidebar() {
           </div>
         )}
 
+        {/* Profile button at bottom */}
         <div className="sidebar-bottom">
-          <button className="sign-out-btn" onClick={signOut}>
-            <span>⎋</span> Sign Out
+          <button className="profile-trigger-btn" onClick={() => setProfileOpen(true)}>
+            <div className="user-avatar">
+              {profile?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div className="user-info">
+              <p className="user-name">{profile?.name || "User"}</p>
+              <p className="user-role">{role === "admin" ? "Admin" : "Viewer"}</p>
+            </div>
+            <span className="profile-chevron">›</span>
           </button>
         </div>
       </aside>
+
+      {/* Profile panel */}
+      {profileOpen && <ProfilePanel onClose={() => setProfileOpen(false)} />}
     </>
   );
 }

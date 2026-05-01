@@ -1,3 +1,4 @@
+// @refresh reset
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { useAuth } from "./AuthContext";
@@ -16,8 +17,11 @@ export function AppProvider({ children }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [activeSheetId, setActiveSheetId] = useState(null);
   const [activeSheetName, setActiveSheetName] = useState(null);
+  const [activeSheetRole, setActiveSheetRole] = useState(null);
 
-  const role = profile?.role || "viewer";
+  const role = activeSheetId
+    ? (activeSheetRole === "owner" ? "admin" : "viewer")
+    : (profile?.role === "admin" ? "admin" : "viewer");
 
   useEffect(() => {
     if (user) fetchTransactions();
@@ -28,15 +32,17 @@ export function AppProvider({ children }) {
     let query = supabase
       .from("transactions")
       .select("*")
-      .eq("user_id", user.id)
       .order("date", { ascending: false });
 
     if (activeSheetId) {
       query = query.eq("sheet_id", activeSheetId);
+    } else {
+      query = query.eq("user_id", user.id).is("sheet_id", null);
     }
 
     const { data, error } = await query;
-    if (!error) setTxList(data || []);
+    if (error) console.error("Fetch transactions:", error.message);
+    else setTxList(data || []);
     setLoading(false);
   }
 
@@ -55,9 +61,8 @@ export function AppProvider({ children }) {
       .select()
       .single();
 
-    if (!error && data) {
-      setTxList(prev => [data, ...prev]);
-    }
+    if (error) console.error("Add transaction:", error.message);
+    else if (data) setTxList(prev => [data, ...prev]);
   }
 
   async function editTransaction(updated) {
@@ -72,11 +77,8 @@ export function AppProvider({ children }) {
       })
       .eq("id", updated.id);
 
-    if (!error) {
-      setTxList(prev =>
-        prev.map(t => (t.id === updated.id ? { ...t, ...updated } : t))
-      );
-    }
+    if (error) console.error("Edit transaction:", error.message);
+    else setTxList(prev => prev.map(t => t.id === updated.id ? { ...t, ...updated } : t));
   }
 
   async function deleteTransaction(id) {
@@ -85,37 +87,29 @@ export function AppProvider({ children }) {
       .delete()
       .eq("id", id);
 
-    if (!error) {
-      setTxList(prev => prev.filter(t => t.id !== id));
-    }
+    if (error) console.error("Delete transaction:", error.message);
+    else setTxList(prev => prev.filter(t => t.id !== id));
   }
 
-  const totalIncome = txList
-    .filter(t => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalExpense = txList
-    .filter(t => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
-
+  const totalIncome = txList.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const totalExpense = txList.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
   return (
-    <AppContext.Provider
-      value={{
-        txList, loading,
-        addTransaction, editTransaction, deleteTransaction, fetchTransactions,
-        filterType, setFilterType,
-        filterCategory, setFilterCategory,
-        searchText, setSearchText,
-        sortBy, setSortBy,
-        activePage, setActivePage,
-        activeSheetId, setActiveSheetId,
-        activeSheetName, setActiveSheetName,
-        totalIncome, totalExpense, balance,
-        role,
-      }}
-    >
+    <AppContext.Provider value={{
+      txList, loading,
+      addTransaction, editTransaction, deleteTransaction, fetchTransactions,
+      filterType, setFilterType,
+      filterCategory, setFilterCategory,
+      searchText, setSearchText,
+      sortBy, setSortBy,
+      activePage, setActivePage,
+      activeSheetId, setActiveSheetId,
+      activeSheetName, setActiveSheetName,
+      activeSheetRole, setActiveSheetRole,
+      totalIncome, totalExpense, balance,
+      role,
+    }}>
       {children}
     </AppContext.Provider>
   );

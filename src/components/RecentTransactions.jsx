@@ -33,7 +33,7 @@ export default function RecentTransactions() {
                 style={{ background: categoryColors[tx.category] || "#94a3b8" }}
               ></div>
               <div className="tx-info">
-                <span className="tx-desc">{tx.desc}</span>
+                <span className="tx-desc">{tx.description}</span>
                 <span className="tx-cat-label">{tx.category}</span>
               </div>
               <span className="tx-date">{formatDate(tx.date)}</span>

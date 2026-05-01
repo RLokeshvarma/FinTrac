@@ -12,7 +12,6 @@ import "./styles.css";
 
 function AppContent() {
   const { activePage } = useApp();
-
   return (
     <div className="app-layout">
       <Sidebar />
@@ -28,18 +27,15 @@ function AppContent() {
 
 function AppWrapper() {
   const { user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="loading-screen">
-        <span style={{ fontSize: 40, marginBottom: 12 }}>◈</span>
+        <span style={{ fontSize: 40 }}>◈</span>
         <p>Loading FinTrac...</p>
       </div>
     );
   }
-
   if (!user) return <LoginPage />;
-
   return (
     <AppProvider>
       <SheetsProvider>

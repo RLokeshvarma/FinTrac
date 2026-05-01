@@ -65,8 +65,8 @@ export default function BalanceTrend() {
       <div className="chart-scroll">
         <svg viewBox={`0 0 ${chartW} ${chartH}`} className="bar-chart-svg">
           {/* Y-axis ticks */}
-          {yTicks().map(tick => (
-            <g key={tick.val}>
+          {yTicks().map((tick, i) => (
+            <g key={i}>
               <line
                 x1={padLeft} y1={tick.y}
                 x2={padLeft + innerW} y2={tick.y}
